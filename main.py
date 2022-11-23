@@ -111,7 +111,7 @@ def fillPile():
             cardPile.append(card(color,number))
             cardPile.append(card(color,number))
     
-    mixCards(cardPile)
+    cardPile=mixCards(cardPile)
     return cardPile
 
 def mixCards(cardPile):
@@ -120,6 +120,7 @@ def mixCards(cardPile):
         temp= cardPile[loc]
         cardPile[loc]= cardPile[i]
         cardPile[i] = temp
+    return cardPile
 
 def startDeck(player, cardPile):
     
@@ -149,7 +150,7 @@ def orderOfPlayers(players):
     
     return orderList
 
-def gameLoop(centerCard, playerList, deck):
+def gameLoop(centerCard, playerList, deck, speed):
     counter = 0
 
     print("\n\nCurrent order of players:\n")
@@ -157,8 +158,9 @@ def gameLoop(centerCard, playerList, deck):
     for p in playerList:
         print(f"{p.getType()}->",end="")
     
-    sleep(4)
-    
+    print("...")
+    sleep(speed)
+    clearScreen()
 
     state = True
     while state:
@@ -169,7 +171,7 @@ def gameLoop(centerCard, playerList, deck):
             color = centerCard.getColor()
 
             print(f"\n---------\nThe center card is:\n{color}\n{number}\n---------")
-            sleep(3)
+            sleep(speed)
             #---------------------------------
 
             
@@ -179,11 +181,11 @@ def gameLoop(centerCard, playerList, deck):
                 
                 print("\nThese are your cards:")
                 current.showCards()
-                sleep(4)
+                sleep(speed)
             
             else:
                 print(f"Its {current.getType()}'s turn to play...\nhe has #{current.ammountCards()} cards")
-                sleep(1)
+                sleep(speed)
 
             res = current.selectPosibleCards(color,number)#if it is the player it will select a compatible card or draw a new one
 
@@ -196,25 +198,23 @@ def gameLoop(centerCard, playerList, deck):
                 number = centerCard.getNumber()
                 color = centerCard.getColor()
                 print(f"\n{current.getType()}, has placed a {color}, {number}!\n")
-                sleep(1)
+                sleep(speed)
             else:
                 current.addCard(deck.pop())
                 print(f"\n{current.getType()} has taken a new card")
-                sleep(1)
+                sleep(speed)
 
 
             if current.ammountCards() == 1:
                 print(f"!!{current.getType()} says he has only one card left!!")
-                sleep(3)
+                sleep(speed)
 
             elif current.ammountCards()==0:
                 print(f"!!!CONGRATS {current.getType()} you have won!!!")
-                sleep(4)
+                sleep(speed)
                 state = False
                 break
-                
-            
-            sleep(2)
+        deck = mixCards(deck)
         
     
     print("GAME OVER")
@@ -225,14 +225,35 @@ def clearScreen():
     else:
         os.system("clear")
 
+
+def textSpeed():
+    speed = input("Select text speed:\ns-slow (3 seconds per text)\nn-normal (2 seconds per test)\nf-fast (one second per text)\n->").lower()
+    if speed == "s":
+        return 3 
+    if speed == "n":
+        return 2
+    if speed == "f":
+        return 1
+    else:
+        print("Using default - normal...")    
+        return 2
+
 if __name__ == "__main__":
     cardPile=fillPile()
-
+    amount = int(input("How many bots ? (1-3):"))
+    
+    speed = textSpeed()
+        
     players = []
     players.append(player("player"))
     players.append(player("bot_1"))
-    players.append(player("bot_2"))
-    players.append(player("bot_3"))
+    if amount > 1:
+        players.append(player("bot_2"))
+        print("bot 2 added")
+
+        if amount > 2:
+            players.append(player("bot_3"))
+            print("bot 3 added")
 
     orderList = orderOfPlayers(players)
     #spread cards to players initial hands
@@ -245,4 +266,4 @@ if __name__ == "__main__":
     #get the top card in the deck to the center
     centerCard = cardPile.pop()
 
-    gameLoop(centerCard,orderList,cardPile)
+    gameLoop(centerCard,orderList,cardPile,speed)
